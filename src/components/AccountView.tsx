@@ -1041,6 +1041,21 @@ export default function AccountView({ onGoToDashboard, onOpenAdminPanel }: Accou
             {authStep === 'phone' && (
               <div className="w-full bg-white border border-[#EDE4F5] rounded-[24px] sm:rounded-[28px] p-6 sm:p-8 shadow-[0_10px_35px_-5px_rgba(91,44,138,0.08)] space-y-5 animate-fadeIn">
                 
+                {/* Account Header Text */}
+                <div className="text-center pt-1">
+                  <div className="w-14 h-14 rounded-2xl bg-[#F8F5FC] border border-[#EDE4F5] text-[#5B2C8A] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                    <User className="w-7 h-7 text-[#5B2C8A]" />
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-black text-[#1F1F2E] tracking-tight">
+                    {language === 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account'}
+                  </h1>
+                  <p className="text-xs text-[#6B7280] mt-1.5 leading-relaxed max-w-xs mx-auto">
+                    {language === 'bn' 
+                      ? 'লগইন বা সাইন আপ করে আপনার ওয়েবসাইট ও অর্ডার এক্সেস করুন' 
+                      : 'Sign in or register to manage your website orders & credentials'}
+                  </p>
+                </div>
+
                 {/* Top: Google Continue Button */}
                 <button
                   type="button"
@@ -1997,6 +2012,19 @@ export default function AccountView({ onGoToDashboard, onOpenAdminPanel }: Accou
       {/* REDESIGNED ACCOUNT DASHBOARD */}
       <section className="max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 w-full mb-8">
         
+        {/* Account Header Text */}
+        <div className="mb-5 sm:mb-6 space-y-1">
+          <h1 className="text-xl sm:text-2xl font-black text-[#1F1F2E] tracking-tight flex items-center gap-2.5">
+            <User className="w-6 h-6 text-[#5B2C8A]" />
+            <span>{language === 'bn' ? 'আমার অ্যাকাউন্ট' : 'My Account'}</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6B7280]">
+            {language === 'bn' 
+              ? 'আপনার প্রোফাইল, ওয়েবসাইট অর্ডার ও ক্লায়েন্ট নিরাপত্তা পোর্টাল' 
+              : 'Manage your client profile, website orders & account security'}
+          </p>
+        </div>
+
         {/* ========================================================= */}
         {/* 1. LAPTOP / DESKTOP VERSION (Wide Horizontal Layout)       */}
         {/* ========================================================= */}

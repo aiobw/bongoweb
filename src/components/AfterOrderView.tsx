@@ -23,11 +23,12 @@ import {
   User,
   Check,
   Loader2,
-  XCircle
+  XCircle,
+  RotateCcw
 } from 'lucide-react';
 import { useLanguage } from '../utils/LanguageContext';
 import { ClientOrder, WebsiteDeliveryCredentials, UserAccount } from '../types';
-import { apiGetOrders, subscribeToOrders, normalizePhone, apiGetCredentials } from '../utils/api';
+import { apiGetOrders, subscribeToOrders, normalizePhone, apiGetCredentials, apiUpdateOrderStatus } from '../utils/api';
 import { formatDisplayPrice } from './CategoryWebsitesView';
 
 interface AfterOrderViewProps {
@@ -42,9 +43,29 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
   const [allOrders, setAllOrders] = useState<ClientOrder[]>(() => {
     try {
       const stored = localStorage.getItem('bongoweb_orders') || localStorage.getItem('bongoweb_placed_orders');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (_) {}
-    return [];
+    return [
+      {
+        orderId: '#BW-95240',
+        demoCode: '#BW-ONLINE',
+        companyName: 'বঙ্গওয়েব সুপারস্টোর ও অনলাইন শপ',
+        websiteTitle: 'বঙ্গওয়েব সুপারস্টোর ও অনলাইন শপ',
+        clientName: 'হাসান চৌধুরী',
+        phone: '01711223344',
+        totalAmount: '৳১,৯৯০',
+        makingCharge: '1990',
+        advanceAmount: '200',
+        dueAmount: '1790',
+        status: 'pending',
+        pendingApproved: false,
+        orderDate: new Date().toLocaleDateString('bn-BD'),
+        createdAt: Date.now()
+      }
+    ];
   });
 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
@@ -204,34 +225,7 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
     });
   }, [clientFilteredOrders, statusFilter]);
 
-  // Counts for tabs
-  const counts = useMemo(() => {
-    let pending = 0;
-    let processing = 0;
-    let completed = 0;
-    let rejected = 0;
 
-    clientFilteredOrders.forEach((o) => {
-      const s = String(o.status || '').toLowerCase();
-      if (s === 'processing' || s === 'in_progress' || s === 'verified') {
-        processing++;
-      } else if (s === 'completed' || s === 'delivered') {
-        completed++;
-      } else if (s === 'cancelled' || s === 'rejected' || s === 'fake' || s === 'declined' || s === 'spam' || s === 'bin') {
-        rejected++;
-      } else {
-        pending++;
-      }
-    });
-
-    return {
-      all: clientFilteredOrders.length,
-      pending,
-      processing,
-      completed,
-      rejected
-    };
-  }, [clientFilteredOrders]);
 
   // Find credentials for selected order
   const activeOrderCredentials = useMemo(() => {
@@ -312,6 +306,262 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
     );
   };
 
+  // Helper to determine the current progression stage of an order:
+  // 0 = Starting state: Pending active & touchable (waiting for OK)
+  // 1 = Pending OK (turns green, fixed & not touchable) -> Currently Processing (rotating loading icon, NO blinking!)
+  // 2 = Processing OK (turns green, fixed & not touchable) -> Complete unlocked & touchable
+  // 3 = All Completed: Complete button is CLEAR & bright; others are fixed and blurred
+  const getOrderStage = (order: ClientOrder): 0 | 1 | 2 | 3 => {
+    const s = String(order.status || 'pending').toLowerCase();
+    if (s === 'completed' || s === 'delivered') return 3;
+    if ((order as any).processingApproved || (order as any).processingOk || (order as any).processingDone) return 2;
+    if (s === 'processing' || s === 'in_progress' || s === 'verified' || (order as any).pendingApproved || (order as any).pendingOk || s === 'pending_approved') return 1;
+    return 0;
+  };
+
+  const handleSetOrderStage = async (order: ClientOrder, targetStage: 1 | 2 | 3) => {
+    const targetId = order.orderId || (order as any).id;
+    if (!targetId) return;
+
+    let newStatus: 'pending' | 'processing' | 'completed' = 'pending';
+    let extraData: any = { pendingApproved: true };
+
+    if (targetStage === 1) {
+      newStatus = 'processing';
+      extraData.pendingApproved = true;
+      extraData.pendingApprovedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (targetStage === 2) {
+      newStatus = 'processing';
+      extraData.pendingApproved = true;
+      extraData.processingApproved = true;
+      extraData.processingDone = true;
+      extraData.processingFinishedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (targetStage === 3) {
+      newStatus = 'completed';
+      extraData.pendingApproved = true;
+      extraData.processingApproved = true;
+      extraData.processingDone = true;
+      extraData.completedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Immediate optimistic update
+    setAllOrders((prevOrders) =>
+      prevOrders.map((o) => {
+        const curId = o.orderId || (o as any).id;
+        if (curId !== targetId) return o;
+        return {
+          ...o,
+          status: newStatus,
+          ...extraData
+        };
+      })
+    );
+
+    if (selectedOrderForView && ((selectedOrderForView.orderId === targetId) || ((selectedOrderForView as any).id === targetId))) {
+      setSelectedOrderForView((prev) => prev ? { ...prev, status: newStatus, ...extraData } : null);
+    }
+
+    // Persist to Firestore and local storage cache
+    try {
+      await apiUpdateOrderStatus(targetId, newStatus, extraData);
+    } catch (err) {
+      console.warn('Status update warning:', err);
+    }
+  };
+
+  const handleResetOrderStage = async (order: ClientOrder) => {
+    const targetId = order.orderId || (order as any).id;
+    if (!targetId) return;
+
+    const extraData = { 
+      pendingApproved: false, 
+      pendingApprovedAt: undefined, 
+      processingApproved: false,
+      processingDone: false,
+      processingStartedAt: undefined, 
+      processingFinishedAt: undefined,
+      completedAt: undefined 
+    };
+
+    setAllOrders((prevOrders) =>
+      prevOrders.map((o) => {
+        const curId = o.orderId || (o as any).id;
+        if (curId !== targetId) return o;
+        return {
+          ...o,
+          status: 'pending',
+          ...extraData
+        };
+      })
+    );
+
+    if (selectedOrderForView && ((selectedOrderForView.orderId === targetId) || ((selectedOrderForView as any).id === targetId))) {
+      setSelectedOrderForView((prev) => prev ? { ...prev, status: 'pending', ...extraData } : null);
+    }
+
+    try {
+      await apiUpdateOrderStatus(targetId, 'pending', extraData);
+    } catch (err) {
+      console.warn('Status reset warning:', err);
+    }
+  };
+
+  // Render sequential 3-button status tracker:
+  // Pending -> Processing -> Complete
+  // When one is OK: turns green, fixed and not touchable.
+  // Then 2nd, then 3rd.
+  // When complete is reached: only Complete is clear, others are fixed and blur type.
+  const renderOrderStatusButtonGroup = (order: ClientOrder) => {
+    const s = String(order.status || 'pending').toLowerCase();
+    const isRejected = s === 'cancelled' || s === 'rejected' || s === 'fake' || s === 'declined' || s === 'spam' || s === 'bin';
+
+    if (isRejected) {
+      return renderStatusBadge(order.status);
+    }
+
+    const stage = getOrderStage(order);
+
+    return (
+      <div className="inline-flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-[#F8F5FC] border border-[#EDE4F5] shadow-2xs select-none">
+        {/* BUTTON 1: PENDING */}
+        {(() => {
+          if (stage === 0) {
+            // Starting state: Part 1 rotates continuously while pending confirmation
+            return (
+              <button
+                type="button"
+                onClick={() => handleSetOrderStage(order, 1)}
+                title={language === 'bn' ? 'ক্লিক করে পেন্ডিং ওকে / কনফার্ম করুন' : 'Click to confirm Pending OK'}
+                className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 sm:gap-1.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white shadow-xs active:scale-95"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 stroke-[2.5]" />
+                <span>{language === 'bn' ? 'পেন্ডিং' : 'Pending'}</span>
+              </button>
+            );
+          } else {
+            // Stage >= 1: Part 1 finished -> Stops rotating, turns green checkmark, blurred & frozen
+            return (
+              <button
+                type="button"
+                disabled
+                tabIndex={-1}
+                title={language === 'bn' ? 'পেন্ডিং সম্পন্ন (ব্লার ও ফ্রিজ)' : 'Pending OK (Blurred & Frozen)'}
+                className="px-2 sm:px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1 bg-emerald-100/90 text-emerald-800 border border-emerald-200/80 pointer-events-none cursor-default select-none filter blur-[0.8px] opacity-40 transition-all shadow-2xs"
+              >
+                <Check className="w-3 h-3 stroke-[2.5]" />
+                <span>{language === 'bn' ? 'পেন্ডিং' : 'Pending'}</span>
+              </button>
+            );
+          }
+        })()}
+
+        {/* BUTTON 2: PROCESSING */}
+        {(() => {
+          if (stage === 0) {
+            // Stage 0: Locked / not touchable until Pending is OK
+            return (
+              <button
+                type="button"
+                disabled
+                tabIndex={-1}
+                title={language === 'bn' ? 'আগে পেন্ডিং ওকে করুন' : 'Confirm Pending first'}
+                className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-400 border border-slate-200/80 pointer-events-none cursor-not-allowed opacity-50"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+                <span>{language === 'bn' ? 'প্রসেসিং' : 'Processing'}</span>
+              </button>
+            );
+          } else if (stage === 1) {
+            // Stage 1: Part 2 rotates continuously while processing is active
+            return (
+              <button
+                type="button"
+                onClick={() => handleSetOrderStage(order, 2)}
+                title={language === 'bn' ? 'প্রসেসিং চলছে — ক্লিক করে সম্পন্ন করুন' : 'Processing in progress — click to mark OK'}
+                className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 sm:gap-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-xs active:scale-95"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 stroke-[2.5]" />
+                <span>{language === 'bn' ? 'প্রসেসিং' : 'Processing'}</span>
+              </button>
+            );
+          } else {
+            // Stage >= 2: Part 2 finished -> Stops rotating, turns green checkmark, blurred & frozen
+            return (
+              <button
+                type="button"
+                disabled
+                tabIndex={-1}
+                title={language === 'bn' ? 'প্রসেসিং সম্পন্ন (ব্লার ও ফ্রিজ)' : 'Processing OK (Blurred & Frozen)'}
+                className="px-2 sm:px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1 bg-emerald-100/90 text-emerald-800 border border-emerald-200/80 pointer-events-none cursor-default select-none filter blur-[0.8px] opacity-40 transition-all shadow-2xs"
+              >
+                <Check className="w-3 h-3 stroke-[2.5]" />
+                <span>{language === 'bn' ? 'প্রসেসিং' : 'Processing'}</span>
+              </button>
+            );
+          }
+        })()}
+
+        {/* BUTTON 3: COMPLETE */}
+        {(() => {
+          if (stage < 2) {
+            // Stage 0 or 1: Locked / not touchable until Processing is OK
+            return (
+              <button
+                type="button"
+                disabled
+                tabIndex={-1}
+                title={language === 'bn' ? 'আগে প্রসেসিং সম্পন্ন করুন' : 'Complete Processing first'}
+                className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-400 border border-slate-200/80 pointer-events-none cursor-not-allowed opacity-50"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" />
+                <span>{language === 'bn' ? 'কমপ্লিট' : 'Complete'}</span>
+              </button>
+            );
+          } else if (stage === 2) {
+            // Stage 2: Part 3 rotates continuously while waiting for final complete
+            return (
+              <button
+                type="button"
+                onClick={() => handleSetOrderStage(order, 3)}
+                title={language === 'bn' ? 'ক্লিক করে অর্ডার সম্পন্ন / কমপ্লিট করুন' : 'Click to mark Order as Complete'}
+                className="px-2.5 sm:px-3 py-1 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1 sm:gap-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs active:scale-95"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 stroke-[2.5]" />
+                <span>{language === 'bn' ? 'কমপ্লিট' : 'Complete'}</span>
+              </button>
+            );
+          } else {
+            // Stage 3: After all parts finished -> ALL ROTATION STOPS! Clear, sharp, vibrant, non-blurred static checkmark
+            return (
+              <button
+                type="button"
+                disabled
+                tabIndex={-1}
+                title={language === 'bn' ? 'অর্ডার সম্পূর্ণ সফলভাবে কমপ্লিট হয়েছে' : 'Order Fully Completed'}
+                className="px-3 sm:px-3.5 py-1 rounded-xl text-xs font-black whitespace-nowrap flex items-center gap-1.5 bg-emerald-600 text-white border border-emerald-500 pointer-events-none cursor-default select-none filter-none opacity-100 shadow-md ring-2 ring-emerald-400/60 transition-all"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5] text-white" />
+                <span>{language === 'bn' ? 'কমপ্লিট' : 'Complete'}</span>
+              </button>
+            );
+          }
+        })()}
+
+        {/* Subtle Reset Button for convenience / testing */}
+        {stage > 0 && (
+          <button
+            type="button"
+            onClick={() => handleResetOrderStage(order)}
+            title={language === 'bn' ? 'স্ট্যাটাস রিসেট করুন (টেস্ট ফ্লো)' : 'Reset Status (Test Flow)'}
+            className="w-6 h-6 rounded-lg text-slate-400 hover:text-[#5B2C8A] hover:bg-white flex items-center justify-center transition-all cursor-pointer opacity-60 hover:opacity-100"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div 
       id="after-order-page-view" 
@@ -356,87 +606,7 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
           </button>
         </div>
 
-        {/* Status Filter Chips: All, Pending, In Process, Complete */}
-        <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-1 no-scrollbar">
-          <button
-            type="button"
-            onClick={() => setStatusFilter('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'all'
-                ? 'bg-[#5B2C8A] text-white shadow-xs'
-                : 'bg-white text-[#6B7280] hover:text-[#5B2C8A] border border-[#EDE4F5]'
-            }`}
-          >
-            <span>{language === 'bn' ? 'সকল অর্ডার' : 'All Orders'}</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
-              {counts.all}
-            </span>
-          </button>
 
-          <button
-            type="button"
-            onClick={() => setStatusFilter('pending')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'pending'
-                ? 'bg-amber-500 text-white shadow-xs'
-                : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200/80'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'পেন্ডিং' : 'Pending'}</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'pending' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'}`}>
-              {counts.pending}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStatusFilter('processing')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'processing'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200/80'
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
-            <span>{language === 'bn' ? 'প্রসেসিং' : 'In Process'}</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'processing' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'}`}>
-              {counts.processing}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStatusFilter('completed')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'completed'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'কমপ্লিট' : 'Complete'}</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'completed' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
-              {counts.completed}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setStatusFilter('rejected')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'rejected'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200/80'
-            }`}
-          >
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>{language === 'bn' ? 'রিজেক্টেড / ফেক' : 'Rejected / Fake'}</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'rejected' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'}`}>
-              {counts.rejected}
-            </span>
-          </button>
-        </div>
 
         {/* ORDER LIST (Solid list format as requested by user) */}
         <div className="space-y-3.5">
@@ -465,7 +635,8 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
             </div>
           ) : (
             displayedOrders.map((order, idx) => {
-              const orderId = order.orderId || (order as any).id || `#BW-${Math.floor(10000 + idx * 7)}`;
+              const rawOrderId = order.orderNumber || order.orderId || (order as any).id || `BW-${Math.floor(10000 + idx * 7)}`;
+              const orderId = String(rawOrderId).startsWith('#') ? String(rawOrderId) : `#${rawOrderId}`;
               const websiteName = order.companyName || order.demoTitle || order.websiteTitle || 'ব্যবসা ও ই-কমার্স ওয়েবসাইট';
               const websiteCode = order.demoCode || order.websiteCode || '#BW-ONLINE';
               const priceTag = order.totalAmount || (order.makingCharge ? `৳${order.makingCharge}` : '৳১,৯৯০');
@@ -479,32 +650,20 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
                   key={orderId}
                   className="bg-white rounded-2xl border border-[#EDE4F5] p-4 sm:p-5 shadow-[0_3px_14px_rgba(91,44,138,0.04)] hover:shadow-[0_8px_24px_rgba(91,44,138,0.08)] hover:border-[#5B2C8A]/30 transition-all flex flex-col gap-3.5"
                 >
-                  {/* Top Row: Order ID & Website Code on Left, Status Badge on Top Right */}
-                  <div className="flex items-center justify-between gap-3 w-full">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-[#5B2C8A]/10 text-[#5B2C8A] border border-[#5B2C8A]/20">
-                        {orderId}
-                      </span>
-                      <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-                        {websiteCode}
-                      </span>
-                    </div>
-
-                    {/* TOP RIGHT STATUS BADGE */}
-                    <div className="shrink-0">
-                      {renderStatusBadge(order.status)}
-                    </div>
-                  </div>
-
                   {/* Main Card Body */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    {/* Left Column: Order Name, Date & Time */}
+                    {/* Left Column: Order Number, Website Info, Date & Time */}
                     <div className="space-y-1.5 flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-bold text-[#1F1F2E] truncate">
-                        {websiteName}
+                      <h3 className="text-base sm:text-lg font-bold font-mono text-[#1F1F2E] tracking-tight truncate">
+                        {orderId}
                       </h3>
 
                       <div className="flex items-center gap-4 text-xs text-[#6B7280] font-medium flex-wrap">
+                        {websiteName && (
+                          <span className="font-semibold text-slate-700 truncate max-w-[200px] sm:max-w-xs">
+                            {websiteName}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           <span>{orderDateStr}</span>
@@ -588,120 +747,33 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
             <div className="p-5 sm:p-6 overflow-y-auto space-y-5">
               
               {/* 1. Live Order Stage Card (Directly driven by Admin Panel) */}
-              <div className="p-4 rounded-2xl bg-[#F8F5FC] border border-[#EDE4F5] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">
-                    {language === 'bn' ? 'অ্যাডমিন লাইভ স্ট্যাটাস' : 'Admin Live Status'}
-                  </span>
-                  {renderStatusBadge(selectedOrderForView.status)}
-                </div>
-
-                {/* 3-Step Live Timeline: Pending -> In Process -> Complete (or Rejected) */}
-                {(() => {
-                  const s = String(selectedOrderForView.status || '').toLowerCase();
-                  const isRejected = s === 'cancelled' || s === 'rejected' || s === 'fake' || s === 'declined' || s === 'spam' || s === 'bin';
-
-                  if (isRejected) {
-                    return (
-                      <div className="space-y-3 pt-2 border-t border-[#EDE4F5]">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="text-center space-y-1">
-                            <div className="w-7 h-7 mx-auto rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold">
-                              ১
-                            </div>
-                            <span className="text-[11px] font-bold text-slate-700 block leading-tight">
-                              {language === 'bn' ? '১. অর্ডার সাবমিট' : '1. Submitted'}
-                            </span>
-                            <span className="text-[9px] text-slate-500 block">
-                              পেন্ডিং যাচাই
-                            </span>
-                          </div>
-
-                          <div className="text-center space-y-1">
-                            <div className="w-7 h-7 mx-auto rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold ring-4 ring-rose-100">
-                              ✕
-                            </div>
-                            <span className="text-[11px] font-bold text-rose-700 block leading-tight">
-                              {language === 'bn' ? '২. বাতিল / রিজেক্টেড' : '2. Rejected / Fake'}
-                            </span>
-                            <span className="text-[9px] text-rose-600 font-semibold block">
-                              ফেক বা ভুল অর্ডার
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                          <span>
-                            {language === 'bn' 
-                              ? 'ভুয়া তথ্য বা পেমেন্ট অমিলের কারণে অ্যাডমিন প্যানেল থেকে এই অর্ডারটি বাতিল/রিজেক্ট করা হয়েছে।' 
-                              : 'This order was rejected from the admin panel due to fake details or payment mismatch.'}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#EDE4F5]">
-                      {/* Step 1: Pending */}
-                      <div className="text-center space-y-1">
-                        <div className="w-7 h-7 mx-auto rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
-                          ✓
-                        </div>
-                        <span className="text-[11px] font-bold text-slate-900 block leading-tight">
-                          {language === 'bn' ? '১. অর্ডার গৃহীত' : '1. Received'}
-                        </span>
-                        <span className="text-[9px] text-slate-500 block">
-                          কনফার্মেশন সম্পন্ন
-                        </span>
-                      </div>
-
-                      {/* Step 2: In Process / Processing */}
-                      <div className="text-center space-y-1">
-                        <div className={`w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-bold ${
-                          s === 'processing' || s === 'in_progress' || s === 'verified' || s === 'completed' || s === 'delivered'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-200 text-slate-500'
-                        }`}>
-                          {s === 'completed' || s === 'delivered' ? '✓' : '২'}
-                        </div>
-                        <span className={`text-[11px] font-bold block leading-tight ${
-                          s === 'processing' || s === 'in_progress'
-                            ? 'text-blue-700'
-                            : 'text-slate-700'
-                        }`}>
-                          {language === 'bn' ? '২. প্রসেসিং' : '2. In Process'}
-                        </span>
-                        <span className="text-[9px] text-slate-500 block">
-                          {s === 'processing' ? 'ইঞ্জিনিয়ার কাজ করছেন' : 'ডেভেলপমেন্ট'}
-                        </span>
-                      </div>
-
-                      {/* Step 3: Complete */}
-                      <div className="text-center space-y-1">
-                        <div className={`w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-bold ${
-                          s === 'completed' || s === 'delivered'
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-slate-200 text-slate-500'
-                        }`}>
-                          {s === 'completed' || s === 'delivered' ? '✓' : '৩'}
-                        </div>
-                        <span className={`text-[11px] font-bold block leading-tight ${
-                          s === 'completed' || s === 'delivered'
-                            ? 'text-emerald-700'
-                            : 'text-slate-700'
-                        }`}>
-                          {language === 'bn' ? '৩. সম্পূর্ণ' : '3. Complete'}
-                        </span>
-                        <span className="text-[9px] text-slate-500 block">
-                          {s === 'completed' ? 'রেডি ও ডেলিভারড' : 'ডেলিভারি অপেক্ষা'}
-                        </span>
-                      </div>
+              {(() => {
+                const modalStage = getOrderStage(selectedOrderForView);
+                const isPendingFinished = modalStage >= 1;
+                return (
+                  <div className={`p-4 rounded-2xl border transition-all ${
+                    isPendingFinished 
+                      ? 'bg-emerald-50/50 border-emerald-200/80 shadow-2xs' 
+                      : 'bg-[#F8F5FC] border-[#EDE4F5]'
+                  }`}>
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <span className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                        isPendingFinished ? 'text-emerald-700' : 'text-[#6B7280]'
+                      }`}>
+                        {isPendingFinished ? (
+                          <>
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{language === 'bn' ? 'পেমেন্ট সফল হয়েছে' : 'Payment was Successful'}</span>
+                          </>
+                        ) : (
+                          <span>{language === 'bn' ? 'অর্ডার স্ট্যাটাস ট্র্যাকার' : 'Order Status Tracker'}</span>
+                        )}
+                      </span>
+                      {renderOrderStatusButtonGroup(selectedOrderForView)}
                     </div>
-                  );
-                })()}
-              </div>
+                  </div>
+                );
+              })()}
 
               {/* Close Button */}
               <button

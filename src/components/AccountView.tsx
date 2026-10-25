@@ -1995,14 +1995,14 @@ export default function AccountView({ onGoToDashboard, onOpenAdminPanel }: Accou
     );
   }
 
-  // User display details matching prompt requirements with client fallbacks
-  const displayUsername = currentUser?.name || 'beegovoltx';
-  const displayEmail = currentUser?.email || 'beegovoltx@gmail.com';
+  // User display details from active logged-in account
+  const displayUsername = currentUser?.name || (language === 'bn' ? 'সম্মানিত ক্লায়েন্ট' : 'Client Account');
+  const displayEmail = currentUser?.email || '';
   const displayPhone = (currentUser?.phone && !currentUser.phone.includes('_') && !currentUser.phone.includes('@') && /\d{6,}/.test(currentUser.phone)) 
     ? currentUser.phone 
-    : '01829918466';
-  const displayJoined = currentUser?.registeredAt || '২৫/১০/২০২৬';
-  const displayId = currentUser?.clientId || 'BW-CLIENT';
+    : '';
+  const displayJoined = currentUser?.registeredAt || new Date().toLocaleDateString('bn-BD');
+  const displayId = currentUser?.clientId || (currentUser?.id ? `BW-${String(currentUser.id).slice(-6)}` : 'BW-CLIENT');
 
   return (
     <div className="relative w-full flex flex-col font-sans pb-28 lg:pb-12 pt-2 sm:pt-4 lg:pt-6 animate-fadeIn bg-[#F8F5FC] text-slate-900 select-none">

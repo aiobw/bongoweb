@@ -48,24 +48,7 @@ export default function AfterOrderView({ onGoToDashboard, onOpenLiveChat }: Afte
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (_) {}
-    return [
-      {
-        orderId: '#BW-95240',
-        demoCode: '#BW-ONLINE',
-        companyName: 'বঙ্গওয়েব সুপারস্টোর ও অনলাইন শপ',
-        websiteTitle: 'বঙ্গওয়েব সুপারস্টোর ও অনলাইন শপ',
-        clientName: 'হাসান চৌধুরী',
-        phone: '01711223344',
-        totalAmount: '৳১,৯৯০',
-        makingCharge: '1990',
-        advanceAmount: '200',
-        dueAmount: '1790',
-        status: 'pending',
-        pendingApproved: false,
-        orderDate: new Date().toLocaleDateString('bn-BD'),
-        createdAt: Date.now()
-      }
-    ];
+    return [];
   });
 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {

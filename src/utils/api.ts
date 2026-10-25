@@ -95,7 +95,7 @@ export const DEFAULT_INITIAL_ORDERS: ClientOrder[] = [];
 // Clean fresh start purge for legacy client sessions, old users, purchase chats and orders
 try {
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-    const FRESH_START_FLAG = 'bongoweb_clean_slate_20261017_v3';
+    const FRESH_START_FLAG = 'bongoweb_official_production_launch_v1';
     if (!localStorage.getItem(FRESH_START_FLAG)) {
       localStorage.removeItem('bongoweb_orders');
       localStorage.removeItem('bongoweb_placed_orders');

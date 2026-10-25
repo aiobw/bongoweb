@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <!-- DBBL Rocket Official Origami Paper Plane Logo (Pure Brand Purple #8C3494) -->
+  <g fill="#8C3494">
+    <!-- Main Fuselage, Right Wing & Keel -->
+    <polygon points="970,65 690,935 485,680 420,815 395,615" />
+    <!-- Left Wing with Fold Slit -->
+    <polygon points="30,455 740,285 435,520 395,615 285,590" />
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- bKash Signature Pink Background -->
+  <rect width="100" height="100" rx="16" fill="#E2136E" />
+  
+  <!-- Origami Bird Facets (Exact replica of official bKash origami bird) -->
+  <g fill="#FFFFFF" stroke="#E2136E" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- 1. Wing folded outer tip -->
+    <polygon points="14,14 12.5,20 25,33" />
+    
+    <!-- 2. Lower wing facet -->
+    <polygon points="14,14 25,33 39,48" />
+    
+    <!-- 3. Upper wing facet -->
+    <polygon points="14,14 47,18 39,48" />
+    
+    <!-- 4. Upper torso / neck facet -->
+    <polygon points="47,18 64,39 39,48" />
+    
+    <!-- 5. Central chest facet -->
+    <polygon points="39,48 64,39 73,53" />
+    
+    <!-- 6. Head facet -->
+    <polygon points="64,39 80,36 73,53" />
+    
+    <!-- 7. Beak facet -->
+    <polygon points="80,36 87.5,43 78,43" />
+    
+    <!-- 8. Throat fold facet -->
+    <polygon points="78,43 73,53 71,56" />
+    
+    <!-- 9. Belly facet -->
+    <polygon points="39,48 73,53 44,69" />
+    
+    <!-- 10. Tail facet -->
+    <polygon points="39,48 44,69 29,86" />
+  </g>
+</svg>

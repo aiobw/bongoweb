@@ -1,0 +1,48 @@
+{
+  "adminConfig": {
+    "adminId": "admin",
+    "adminEntryPassword": "admin123",
+    "adminActionPassword": "confirm786",
+    "masterKey": "MASTER-BONGO-2026"
+  },
+  "users": [],
+  "orders": [],
+  "supportChats": [
+    {
+      "userPhone": "+16505551234",
+      "userName": "Sheena Nelson",
+      "language": "en",
+      "lastMessage": "Does it come in another color?",
+      "lastUpdated": "এখনই",
+      "unreadAdminCount": 2,
+      "unreadClientCount": 0,
+      "expiresAt": 1792875807592,
+      "isClosed": false,
+      "isArchived": false,
+      "additionalMinutesAdded": 0,
+      "messages": [
+        {
+          "id": "wamid.HBgLMTY1MDM4Nzk0MzkVAgASGBQzQTRBNjU5OUFFRTAzODEwMTQ0RgA=",
+          "sender": "client",
+          "text": "Does it come in another color?",
+          "timestamp": "08:59 PM"
+        }
+      ]
+    }
+  ],
+  "customWebsites": [],
+  "deliveredCredentials": [],
+  "resetRequests": [],
+  "reports": [],
+  "logoConfig": {
+    "logoType": "image",
+    "imageUrl": "",
+    "imageSizePx": 36,
+    "showBrandTextWithImage": true,
+    "typedLogoText": "BongoWeb",
+    "typedSubtitle": ".xyz",
+    "textGradientTheme": "royal",
+    "updatedAt": "2026-10-23T20:00:00.000Z"
+  },
+  "emailRecoveries": []
+}

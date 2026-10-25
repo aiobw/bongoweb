@@ -1,0 +1,29 @@
+{
+  "name": "BongoWeb — Premium Website Solutions",
+  "short_name": "BongoWeb",
+  "description": "Explore verified e-commerce, restaurant, blogging, and grocery websites with 24-hour setup and 24/7 support.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2B47EE",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/bongoweb-logo.svg",
+      "sizes": "460x120",
+      "type": "image/svg+xml"
+    }
+  ]
+}

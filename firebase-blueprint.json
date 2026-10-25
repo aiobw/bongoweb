@@ -1,0 +1,129 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Client website order with transaction information and progress state",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "companyName": { "type": "string" },
+        "demoTitle": { "type": "string" },
+        "demoUrl": { "type": "string" },
+        "packageTitle": { "type": "string" },
+        "makingCharge": { "type": "string" },
+        "advancePayment": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "senderPhone": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "verified", "cancelled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["orderId", "clientName", "phone", "demoTitle", "status"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Registered customer profile on the platform",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "password": { "type": "string" },
+        "registeredAt": { "type": "string" }
+      },
+      "required": ["name", "phone", "email"]
+    },
+    "SupportChat": {
+      "title": "SupportChat",
+      "description": "Live support chat thread between client and admin",
+      "type": "object",
+      "properties": {
+        "userPhone": { "type": "string" },
+        "userName": { "type": "string" },
+        "language": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "unreadAdminCount": { "type": "number" },
+        "unreadClientCount": { "type": "number" },
+        "expiresAt": { "type": "number" },
+        "isClosed": { "type": "boolean" },
+        "messages": { "type": "array" }
+      },
+      "required": ["userPhone", "userName"]
+    },
+    "Website": {
+      "title": "Website",
+      "description": "Official catalog website template available for purchase and live demo",
+      "type": "object",
+      "properties": {
+        "fourDigitCode": { "type": "string" },
+        "title": { "type": "string" },
+        "banglaTitle": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "priceTag": { "type": "string" },
+        "demoUrl": { "type": "string" },
+        "previewImage": { "type": "string" }
+      },
+      "required": ["fourDigitCode", "title", "category", "priceTag"]
+    },
+    "DeliveredCredential": {
+      "title": "DeliveredCredential",
+      "description": "Handed over website admin credentials for completed client orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderId": { "type": "string" },
+        "userPhone": { "type": "string" },
+        "websiteAdminId": { "type": "string" },
+        "websiteAdminPass": { "type": "string" },
+        "notes": { "type": "string" },
+        "deliveredAt": { "type": "string" }
+      },
+      "required": ["id", "userPhone", "websiteAdminId", "websiteAdminPass"]
+    },
+    "ResetRequest": {
+      "title": "ResetRequest",
+      "description": "Customer requested password reset call desk ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "phone": { "type": "string" },
+        "requestedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reset", "rejected", "call_not_received"] },
+        "resolvedAt": { "type": "string" },
+        "newPasswordAssigned": { "type": "string" }
+      },
+      "required": ["id", "phone", "status"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of client orders placed on the website"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Registered customer accounts"
+    },
+    "/supportChats/{phone}": {
+      "schema": "SupportChat",
+      "description": "Live support chat threads indexed by user phone number"
+    },
+    "/customWebsites/{code}": {
+      "schema": "Website",
+      "description": "Catalog website templates available for preview and ordering"
+    },
+    "/deliveredCredentials/{id}": {
+      "schema": "DeliveredCredential",
+      "description": "Delivered admin credentials for customer websites"
+    },
+    "/resetRequests/{id}": {
+      "schema": "ResetRequest",
+      "description": "Password reset telephone verification requests"
+    }
+  }
+}

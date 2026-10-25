@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" fill="none">
+  <defs>
+    <!-- Background Canvas -->
+    <linearGradient id="ogBg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0B132B" />
+      <stop offset="50%" stop-color="#080E21" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Radial Glow Blobs -->
+    <radialGradient id="royalGlow" cx="280" cy="315" r="450" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2B47EE" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#2B47EE" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#2B47EE" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="violetGlow" cx="950" cy="180" r="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.25" />
+      <stop offset="70%" stop-color="#7C3AED" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Flame Gradients -->
+    <linearGradient id="ogFlameGrad" x1="20" y1="10" x2="95" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A855F7" />
+      <stop offset="25%" stop-color="#8B5CF6" />
+      <stop offset="55%" stop-color="#4F46E5" />
+      <stop offset="80%" stop-color="#2B47EE" />
+      <stop offset="100%" stop-color="#1E3A8A" />
+    </linearGradient>
+    <linearGradient id="ogRibbonGrad" x1="15" y1="30" x2="80" y2="105" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C084FC" />
+      <stop offset="35%" stop-color="#7C3AED" />
+      <stop offset="70%" stop-color="#3B52E8" />
+      <stop offset="100%" stop-color="#253BD9" />
+    </linearGradient>
+    <linearGradient id="ogTextGrad" x1="0" y1="0" x2="400" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="60%" stop-color="#F1F5F9" />
+      <stop offset="100%" stop-color="#C7D2FE" />
+    </linearGradient>
+    <linearGradient id="accentBadgeGrad" x1="0" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2B47EE" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <filter id="logoGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#2B47EE" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Deep luxury tech backdrop -->
+  <rect width="1200" height="630" fill="url(#ogBg)" />
+
+  <!-- Ambient Light Fields -->
+  <circle cx="280" cy="315" r="450" fill="url(#royalGlow)" />
+  <circle cx="950" cy="180" r="400" fill="url(#violetGlow)" />
+
+  <!-- Subtle Architectural Grid Accent -->
+  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+    <line x1="80" y1="0" x2="80" y2="630" />
+    <line x1="1120" y1="0" x2="1120" y2="630" />
+    <line x1="0" y1="80" x2="1200" y2="80" />
+    <line x1="0" y1="550" x2="1200" y2="550" />
+  </g>
+
+  <!-- Card Border -->
+  <rect x="24" y="24" width="1152" height="582" rx="24" stroke="#2B47EE" stroke-opacity="0.25" stroke-width="1.5" fill="none" />
+
+  <!-- Left: Glowing Emblem (Scale 2.6x) -->
+  <g transform="translate(100, 150) scale(2.8)" filter="url(#logoGlow)">
+    <path
+      d="M 58 112 C 34 112 16 93 16 68 C 16 52 24 38 36 29 C 38 27 42 30 40 33 C 33 42 28 53 28 66 C 28 85 41 99 59 99 C 75 99 88 88 91 73 C 92 68 97 67 98 71 C 99 74 97 81 95 86 C 88 101 74 112 58 112 Z"
+      fill="url(#ogFlameGrad)"
+    />
+    <path
+      d="M 36 29 C 33 33 31 38 30 44 C 29 42 30 38 32 34 C 36 26 44 18 52 14 C 54 13 56 16 55 18 C 51 25 45 35 46 44 C 47 48 50 51 54 49 C 60 46 64 36 67 27 C 70 18 73 11 74 8 C 75 6 78 8 78 11 C 77 19 72 32 76 41 C 78 45 83 46 87 42 C 92 37 94 28 95 22 C 95 20 98 21 98 23 C 98 32 94 43 97 52 C 99 57 104 60 106 66 C 109 74 107 83 102 90 C 100 93 96 91 97 88 C 100 81 100 73 97 67 C 94 62 89 60 86 64 C 81 71 80 81 74 87 C 67 94 57 97 47 95 C 37 93 29 84 29 73 C 29 63 35 55 42 49 C 45 47 48 51 45 54 C 38 60 38 71 44 78 C 50 84 60 84 66 79 C 71 75 73 68 76 62 C 78 57 82 54 84 59 C 85 62 84 66 82 69 C 78 77 72 82 64 84 C 55 86 46 83 42 75 C 39 70 40 62 44 57 C 48 52 54 48 58 44 C 61 41 59 36 55 36 C 50 36 44 41 41 46 C 39 49 35 48 35 45 C 35 39 40 31 46 25 C 48 23 51 21 54 19 C 55 18 54 16 53 16 C 45 20 38 24 36 29 Z"
+      fill="url(#ogRibbonGrad)"
+    />
+    <path
+      d="M 52 68 C 50 74 53 80 59 81 C 65 82 70 78 72 73 C 74 68 71 63 66 62 C 60 61 54 63 52 68 Z"
+      fill="#FFFFFF"
+      fill-opacity="0.95"
+    />
+    <path
+      d="M 44 82 C 40 76 43 70 48 67 C 49 66 50 68 49 69 C 46 72 44 76 46 80 C 47 83 50 84 53 84 C 55 84 56 86 54 87 C 50 88 46 86 44 82 Z"
+      fill="#FFFFFF"
+      fill-opacity="0.75"
+    />
+  </g>
+
+  <!-- Right: Typography & Brand Value Proposition -->
+  <g transform="translate(480, 160)">
+    <!-- Small Live Badge -->
+    <rect x="0" y="0" width="168" height="34" rx="17" fill="url(#accentBadgeGrad)" />
+    <circle cx="18" cy="17" r="5" fill="#10B981" />
+    <text x="32" y="22" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="12" fill="#FFFFFF" letter-spacing="1.2">OFFICIAL HUB</text>
+
+    <!-- Main Wordmark -->
+    <text x="0" y="105" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="82" letter-spacing="-2.5px" fill="url(#ogTextGrad)">
+      BongoWeb
+    </text>
+    <text x="445" y="105" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="82" letter-spacing="-2.5px" fill="#A855F7">
+      .xyz
+    </text>
+
+    <!-- Slogan / Subtitle -->
+    <text x="0" y="155" font-family="system-ui, -apple-system, sans-serif" font-weight="600" font-size="24" fill="#94A3B8" letter-spacing="-0.5px">
+      Premium Ready-to-Launch Websites &amp; Digital Solutions
+    </text>
+
+    <!-- Feature Value Tags -->
+    <g transform="translate(0, 205)">
+      <!-- Item 1 -->
+      <g>
+        <circle cx="10" cy="10" r="8" fill="#2B47EE" />
+        <path d="M7 10 L9 12 L13 8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="15" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#F1F5F9">
+          24-Hour Express Launch
+        </text>
+      </g>
+
+      <!-- Item 2 -->
+      <g transform="translate(250, 0)">
+        <circle cx="10" cy="10" r="8" fill="#10B981" />
+        <path d="M7 10 L9 12 L13 8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="15" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#F1F5F9">
+          100% Refund Guarantee
+        </text>
+      </g>
+
+      <!-- Item 3 -->
+      <g transform="translate(0, 42)">
+        <circle cx="10" cy="10" r="8" fill="#7C3AED" />
+        <path d="M7 10 L9 12 L13 8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="15" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#F1F5F9">
+          Automated bKash &amp; Nagad
+        </text>
+      </g>
+
+      <!-- Item 4 -->
+      <g transform="translate(250, 42)">
+        <circle cx="10" cy="10" r="8" fill="#F59E0B" />
+        <path d="M7 10 L9 12 L13 8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="26" y="15" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#F1F5F9">
+          Full Live Demo Testing
+        </text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Bar: Trust Indicators -->
+  <g transform="translate(80, 520)">
+    <text x="0" y="20" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="16" fill="#64748B">
+      E-COMMERCE · RESTAURANT · BLOG &amp; MEDIA · GROCERY
+    </text>
+    <text x="1040" y="20" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="16" fill="#2B47EE" text-anchor="end">
+      https://bongoweb.xyz
+    </text>
+  </g>
+</svg>

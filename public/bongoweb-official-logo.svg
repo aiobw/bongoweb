@@ -1,0 +1,75 @@
+<svg viewBox="0 0 490 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Master Brand Gradient: Deep Purple (#6E26D9 / #7C3AED) to Royal Electric Blue (#3557F6 / #2563EB) -->
+    <linearGradient id="bwCircleGradient" x1="10" y1="10" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6D28D9" />
+      <stop offset="35%" stop-color="#7C3AED" />
+      <stop offset="70%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <linearGradient id="bwTextGradient" x1="130" y1="20" x2="470" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6D28D9" />
+      <stop offset="25%" stop-color="#7C3AED" />
+      <stop offset="60%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+  </defs>
+
+  <!-- ============================================== -->
+  <!-- 1. CIRCULAR EMBLEM WITH ICONIC 'B' WING MONOGRAM -->
+  <!-- ============================================== -->
+  <g id="emblem" transform="translate(5, 5)">
+    <!-- Circle Base -->
+    <circle cx="50" cy="50" r="50" fill="url(#bwCircleGradient)" />
+
+    <!-- Top Wing & Upper Loop of 'B' -->
+    <path
+      d="M 10 24 L 52 24 C 67 24 77 33 77 44 C 77 51 72 57 64 59 C 61 60 56 61 50 61 L 28 61 L 43 38 L 22 38 L 10 24 Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- Diagonal Stem & Lower Loop of 'B' -->
+    <path
+      d="M 18 78 L 32 54 L 54 54 C 68 54 78 63 78 74 C 78 86 67 96 50 96 L 24 96 L 36 78 L 52 78 C 58 78 63 74 63 69 C 63 64 58 60 51 60 L 30 60 L 18 78 Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- Dynamic Cutout Accents -->
+    <path
+      d="M 38 38 L 52 38 C 59 38 64 41 64 45 C 64 49 59 52 52 52 L 29 52 L 38 38 Z"
+      fill="url(#bwCircleGradient)"
+    />
+  </g>
+
+  <!-- ============================================== -->
+  <!-- 2. TYPOGRAPHIC WORDMARK: BongoWeb -->
+  <!-- ============================================== -->
+  <g id="wordmark" transform="translate(130, 0)">
+    <!-- Base Wordmark Text -->
+    <text
+      x="0"
+      y="76"
+      font-family="'Plus Jakarta Sans', 'Inter', -apple-system, system-ui, sans-serif"
+      font-weight="900"
+      font-size="58"
+      letter-spacing="-1.5px"
+      fill="url(#bwTextGradient)"
+    >BongoWeb</text>
+
+    <!-- Distinctive Triangle Accent above the first 'o' (centered around x=82, y=28) -->
+    <polygon
+      points="76,26 88,26 82,35"
+      fill="url(#bwTextGradient)"
+    />
+
+    <!-- Distinctive Smiling Arc beneath the first 'o' (under x=82, y=78) -->
+    <path
+      d="M 74 81 C 74 87 90 87 90 81"
+      stroke="url(#bwTextGradient)"
+      stroke-width="4"
+      stroke-linecap="round"
+      fill="none"
+    />
+  </g>
+</svg>

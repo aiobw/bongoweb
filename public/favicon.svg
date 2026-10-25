@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <!-- Vibrant Rich Purple to Violet Gradient -->
+    <linearGradient id="favPurpleGrad" x1="16" y1="16" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5521B5" />
+      <stop offset="25%" stop-color="#6B46C1" />
+      <stop offset="65%" stop-color="#805AD5" />
+      <stop offset="100%" stop-color="#9F7AEA" />
+    </linearGradient>
+
+    <!-- Clean crisp drop shadow for favicon -->
+    <filter id="favPurpleGlow" x="0" y="2" width="128" height="128" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#6B46C1" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Centered Circular Purple Badge -->
+  <circle cx="64" cy="64" r="54" fill="url(#favPurpleGrad)" filter="url(#favPurpleGlow)" />
+  <circle cx="64" cy="64" r="53" stroke="rgba(255, 255, 255, 0.28)" stroke-width="2" />
+
+  <!-- Geometric "B" Monogram scaled for crisp 16px - 128px visibility -->
+  <g transform="translate(64, 64) scale(0.68) translate(-47, -47)">
+    <path
+      d="M 23 25 C 23 23.34 24.34 22 26 22 L 48.5 C 59.8 22 69 31.2 69 42.5 C 69 49.6 65.3 55.8 59.5 59.3 C 57.2 60.7 54.3 61.5 51 61.5 L 34.5 61.5 L 43.5 45 L 30 45 L 23 25 Z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M 23 70 C 23 71.66 24.34 73 26 73 L 53 C 65.2 73 74 63.8 74 52 C 74 46.5 71.8 41.5 68 38 L 57.5 48 C 59.5 50 61 52.8 61 56 C 61 62.5 55.5 67 48.5 67 L 33 67 L 40 54 L 27.5 54 L 23 70 Z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M 37.5 31 L 47.5 31 C 53.5 31 58 35.5 58 41.5 C 58 47.5 53.5 52 47.5 52 L 40.5 52 L 37.5 31 Z"
+      fill="url(#favPurpleGrad)"
+    />
+    <circle cx="34" cy="47" r="3.5" fill="#FFFFFF" opacity="0.9" />
+  </g>
+</svg>
